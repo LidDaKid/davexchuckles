@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>MySpace</title>
+<title>davexchuckles</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.1.6/purify.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
 <style>
@@ -146,7 +146,7 @@
 <body>
 <div class="wrap">
   <div class="top">
-    <a class="logo" href="#/">myspace.com <small>a place for friends</small></a>
+    <a class="logo" href="#/">davexchuckles <small>a place for friends</small></a>
     <div class="hello" id="hello"></div>
   </div>
   <div class="nav" id="nav">
@@ -319,7 +319,7 @@
           <div class="noed" id="p-status" style="padding:0 6px 6px"></div>
         </div>
 
-        <div class="url" data-sec="url"><b data-k="urllbl" data-def="MySpace URL:"></b><br><span data-k="url" data-def="%u" data-ph="URL"></span></div>
+        <div class="url" data-sec="url"><b data-k="urllbl" data-def="URL:"></b><br><span data-k="url" data-def="%u" data-ph="URL"></span></div>
 
         <div data-sec="player">
           <div class="player">
@@ -385,7 +385,7 @@
     </div>
   </div>
 
-  <div class="foot">&copy; 2003-2006 MySpace.com. All Rights Reserved.</div>
+  <div class="foot">davexchuckles</div>
 </div>
 <audio id="aud"></audio>
 <div class="toast" id="toast"></div>
@@ -479,7 +479,7 @@ let UID = null;         // logged-in user's id (their storage folder)
 const SUPA_URL = 'https://ejxfdvzsgezwjkauszox.supabase.co';
 const sb = supabase.createClient(SUPA_URL, 'sb_publishable__XpICNasyq536q6XM3-YMg_EHEhFQhD');
 // accounts are username + password; supabase wants an email, so each username gets a made-up one
-const EMAIL = u => u + '@myspace-rawr.com';
+const EMAIL = u => u + '@davexchuckles.com';
 const ERRORS = { 'Invalid login credentials': 'Wrong username or password', 'Database error saving new user': 'Could not sign up' };
 async function q(promise) {
   const { data, error } = await promise;
@@ -741,7 +741,7 @@ function fillTexts() {
     const k = el.dataset.k;
     el.innerHTML = P.text[k] != null ? clean(P.text[k]) : (el.dataset.def || '').replace(/%([nful])/g, (m, c) => subs[c]);
   });
-  document.title = 'MySpace.com - ' + n;
+  document.title = 'davexchuckles - ' + n;
 }
 $$('#v-profile [data-k]').forEach(el => {
   el.addEventListener('input', () => {
@@ -1002,7 +1002,7 @@ function resetTheme() {
   ['font', 'size', 'radius', ...COLORS.map(c => c[0])].forEach(k => root.style.removeProperty('--' + k));
   document.body.style.backgroundImage = '';
   $('#custom').textContent = '';
-  document.title = 'MySpace';
+  document.title = 'davexchuckles';
 }
 function applyTheme() {
   COLORS.forEach(([k]) => {
@@ -1291,7 +1291,7 @@ async function openMedia(u, kind) {
 }
 function renderMedia() {
   const kind = MEDIA_KIND, n = strip(P.text.name) || V.u;
-  document.title = 'MySpace.com - ' + n;
+  document.title = 'davexchuckles - ' + n;
   $('#md-back').textContent = `Back to ${n}'s Profile`;
   $('#md-back').href = '#/u/' + enc(V.u);
   $('#md-tools').classList.toggle('hidden', !(own() && kind !== 'friends'));
@@ -1492,7 +1492,7 @@ async function openGroup(id) {
 function renderGroup() {
   const mem = G.members.includes(ME.u), owner = G.owner === ME.u;
   $('#gp-name').textContent = G.name;
-  document.title = 'MySpace.com - ' + G.name;
+  document.title = 'davexchuckles - ' + G.name;
   $('#gp-join').classList.toggle('hidden', mem);
   $('#gp-leave').classList.toggle('hidden', !mem || owner);
   $('#gp-rename').classList.toggle('hidden', !owner);
