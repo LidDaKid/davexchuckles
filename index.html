@@ -108,6 +108,18 @@
   .media .cap { min-height: 1em; margin-top: 3px; word-break: break-word; }
   .media input { width: 100%; box-sizing: border-box; margin-top: 3px; }
   .glist a { display: block; padding: 3px 0; }
+  .blinkies { display: flex; flex-wrap: wrap; gap: 2px; padding: 6px; justify-content: center; }
+  .blinkies img { display: block; max-width: 100%; }
+  body { position: relative; }
+  #stickers { position: absolute; inset: 0; overflow: hidden; pointer-events: none; z-index: 20; }
+  .stk { position: absolute; }
+  .stk img { display: block; width: 100%; height: auto; user-select: none; -webkit-user-drag: none; }
+  .stk .x, .stk .rs { display: none; position: absolute; background: #f0f; color: #fff; font: bold 11px Verdana; line-height: 14px; width: 14px; height: 14px; text-align: center; cursor: pointer; }
+  .stk .x { top: -7px; right: -7px; }
+  .stk .rs { bottom: -7px; right: -7px; cursor: nwse-resize; }
+  body.editing .stk { pointer-events: auto; cursor: move; outline: 1px dashed #f0f; touch-action: none; }
+  body.editing .stk .x, body.editing .stk .rs { display: block; }
+  .thumbs { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px; }
   .toast { position: fixed; left: 50%; bottom: 20px; transform: translateX(-50%); background: #000; color: #fff; padding: 8px 14px; font: bold 12px Verdana; z-index: 100; display: none; }
 
   /* edit mode */
@@ -321,6 +333,11 @@
 
         <div class="url" data-sec="url"><b data-k="urllbl" data-def="URL:"></b><br><span data-k="url" data-def="%u" data-ph="URL"></span></div>
 
+        <div class="box" data-sec="blinkies">
+          <h3 data-k="h_blinkies" data-def="Blinkies" data-ph="Heading"></h3>
+          <div class="blinkies" id="blinkies"></div>
+        </div>
+
         <div data-sec="player">
           <div class="player">
             <button id="prev">&#9664;&#9664;</button>
@@ -387,6 +404,7 @@
 
   <div class="foot">davexchuckles</div>
 </div>
+<div id="stickers" class="hidden"></div>
 <audio id="aud"></audio>
 <div class="toast" id="toast"></div>
 <div class="modal hidden" id="modal"><div class="mbox"><h3 id="modal-title"></h3><div class="in" id="modal-body"></div></div></div>
@@ -432,6 +450,16 @@
     <button id="adclear">Remove banner picture</button>
   </div>
 
+  <h4>Blinkies</h4>
+  <div class="btns"><button id="blinkpick">Upload</button></div>
+  <div class="plrow"><input id="blinkurl" placeholder="Link"><button id="blinkadd">Add</button></div>
+  <div id="bl-edit"></div>
+
+  <h4>GIFs</h4>
+  <div class="btns"><button id="stkpick">Upload</button></div>
+  <div class="plrow"><input id="stkurl" placeholder="Link"><button id="stkadd">Add</button></div>
+  <div class="thumbs" id="stk-edit"></div>
+
   <h4>Top Friends</h4>
   <div class="grid"><span>How many</span><input type="number" id="fnum" min="0" max="40"></div>
 
@@ -460,6 +488,7 @@
 
 <input type="file" id="imgfile" accept="image/png,image/jpeg,image/gif,image/webp" hidden>
 <input type="file" id="songfile" accept="audio/*" multiple hidden>
+<input type="file" id="giffile" accept="image/png,image/jpeg,image/gif,image/webp" multiple hidden>
 
 <script>
 const $ = s => document.querySelector(s), $$ = s => document.querySelectorAll(s);
@@ -554,6 +583,7 @@ function postRow(c, canDelete, onDelete) {
 const VIEWS = ['v-login', 'v-home', 'v-browse', 'v-profile', 'v-mail', 'v-groups', 'v-group', 'v-media'];
 function show(id) {
   VIEWS.forEach(v => $('#' + v).classList.toggle('hidden', v !== id));
+  $('#stickers').classList.toggle('hidden', id !== 'v-profile');
   $('#nav').classList.toggle('hidden', !ME);
   $('#hello').innerHTML = ME ? `Hello, ${esc(userName(ME.u))}! | <a href="#" id="hello-out">Log Out</a>` : '';
   if (ME) { $('#nav-me').href = '#/u/' + enc(ME.u); $('#hello-out').onclick = logout; }
@@ -696,6 +726,7 @@ function normalize(p) {
   p.top ??= []; p.topn ??= 8;
   p.sparkc ??= '#ff66cc'; p.bgmode ??= 'tile';
   p.album ??= []; p.videos ??= []; p.songs ??= [];
+  p.blinkies ??= []; p.stickers ??= [];
   return p;
 }
 async function loadComments(u) {
@@ -1083,7 +1114,7 @@ $('#th-save').onclick = () => {
 // ---- show/hide ----
 const SECS = [
   ['ad', 'Banner'], ['online', 'Online Now'], ['login', 'Last Login'], ['viewmy', 'View My'],
-  ['contact', 'Contact box'], ['url', 'URL'], ['player', 'Music player'], ['interests', 'Interests'], ['details', 'Details'],
+  ['contact', 'Contact box'], ['url', 'URL'], ['blinkies', 'Blinkies'], ['player', 'Music player'], ['interests', 'Interests'], ['details', 'Details'],
   ['ext', 'Network box'], ['blog', 'Blog'], ['blurbs', 'Blurbs'], ['friends', 'Top Friends'], ['comments', 'Comments']
 ];
 $('#secs').innerHTML = SECS.map(([k, l]) => `<label><input type="checkbox" data-s="${k}"> ${l}</label>`).join('');
@@ -1095,6 +1126,7 @@ function applySecs() {
   });
   // nothing to play and not editing: hide the empty player
   if (!songsList().length && !editing()) $('[data-sec="player"]').classList.add('hidden');
+  if (!P.blinkies.length && !editing()) $('[data-sec="blinkies"]').classList.add('hidden');
 }
 
 // ---- edit mode ----
@@ -1224,6 +1256,107 @@ $('#songfile').onchange = async e => {
   }
 };
 
+// ---- blinkies + gifs (uploaded file or a pasted link) ----
+const gifSrc = g => g.path ? fileURL(g.path) : /^https?:\/\//i.test(g.url || '') ? g.url : BLANK;
+let gifTarget = 'blinkies';
+$('#blinkpick').onclick = () => { gifTarget = 'blinkies'; $('#giffile').click(); };
+$('#stkpick').onclick = () => { gifTarget = 'stickers'; $('#giffile').click(); };
+function addGif(kind, g) {
+  // new gifs land near the top of what's on screen
+  if (kind === 'stickers') Object.assign(g, { x: Math.round(Math.random() * 200 - 100), y: Math.round(window.scrollY + 120 + Math.random() * 100), w: 0 });
+  P[kind].push(g);
+  save(0); renderBlinkies(); renderStickers(); applySecs();
+}
+$('#giffile').onchange = async e => {
+  const files = [...e.target.files]; e.target.value = '';
+  const kind = gifTarget;
+  for (const f of files) {
+    try {
+      $('#saved').textContent = 'Uploading ' + f.name;
+      addGif(kind, { path: await putFile(kind === 'blinkies' ? 'blk' : 'stk', await shrink(f, 500)) });
+    } catch (err) { $('#saved').textContent = err.message; toast(err.message); }
+  }
+};
+function addLink(kind, inp) {
+  const url = inp.value.trim();
+  if (!/^https?:\/\/\S+$/i.test(url)) return toast('Paste a picture link');
+  inp.value = '';
+  addGif(kind, { url });
+}
+$('#blinkadd').onclick = () => addLink('blinkies', $('#blinkurl'));
+$('#stkadd').onclick = () => addLink('stickers', $('#stkurl'));
+$('#blinkurl').onkeydown = e => { if (e.key === 'Enter') addLink('blinkies', e.target); };
+$('#stkurl').onkeydown = e => { if (e.key === 'Enter') addLink('stickers', e.target); };
+function removeGif(kind, g) {
+  dropFile(g.path);
+  P[kind] = P[kind].filter(z => z !== g);
+  save(0); renderBlinkies(); renderStickers(); applySecs();
+}
+function renderBlinkies() {
+  const box = $('#blinkies'), ed = $('#bl-edit');
+  box.innerHTML = ''; ed.innerHTML = '';
+  P.blinkies.forEach((g, i) => {
+    const img = document.createElement('img');
+    img.src = gifSrc(g); img.alt = '';
+    box.appendChild(img);
+    const row = document.createElement('div');
+    row.className = 'plrow';
+    const th = img.cloneNode();
+    th.style.cssText = 'max-width:150px;max-height:30px;flex:1;min-width:0;object-fit:contain;object-position:left';
+    const move = d => () => {
+      [P.blinkies[i], P.blinkies[i + d]] = [P.blinkies[i + d], P.blinkies[i]];
+      save(); renderBlinkies();
+    };
+    const up = btn('▲', move(-1)), down = btn('▼', move(1));
+    up.disabled = i === 0; down.disabled = i === P.blinkies.length - 1;
+    row.append(th, up, down, btn('Remove', () => removeGif('blinkies', g)));
+    ed.appendChild(row);
+  });
+}
+// gifs float over the page; x is measured from the middle so they stay put next to the profile
+function renderStickers() {
+  const layer = $('#stickers'), ed = $('#stk-edit');
+  layer.innerHTML = ''; ed.innerHTML = '';
+  P.stickers.forEach(g => {
+    const d = document.createElement('div');
+    d.className = 'stk';
+    d.innerHTML = '<img alt=""><span class="x">×</span><span class="rs"></span>';
+    const img = d.firstChild;
+    img.src = gifSrc(g);
+    const place = () => {
+      d.style.left = `calc(50% + ${g.x}px)`; d.style.top = g.y + 'px';
+      d.style.width = g.w ? g.w + 'px' : '';
+      img.style.maxWidth = g.w ? '' : '200px';
+    };
+    place();
+    d.children[1].onclick = () => removeGif('stickers', g);
+    // drag to move, drag the corner to resize
+    d.onpointerdown = e => {
+      if (!editing() || e.target.classList.contains('x')) return;
+      e.preventDefault();
+      const resize = e.target.classList.contains('rs');
+      const sx = e.clientX, sy = e.clientY, ox = g.x, oy = g.y, ow = img.getBoundingClientRect().width;
+      const half = layer.clientWidth / 2;
+      const mv = ev => {
+        if (resize) g.w = Math.round(Math.max(16, Math.min(800, ow + ev.clientX - sx)));
+        else {
+          g.x = Math.round(Math.max(-half, Math.min(half - 16, ox + ev.clientX - sx)));
+          g.y = Math.round(Math.max(0, Math.min(layer.clientHeight - 16, oy + ev.clientY - sy)));
+        }
+        place();
+      };
+      const up = () => { removeEventListener('pointermove', mv); removeEventListener('pointerup', up); save(); };
+      addEventListener('pointermove', mv); addEventListener('pointerup', up);
+    };
+    layer.appendChild(d);
+    const th = document.createElement('img');
+    th.src = gifSrc(g); th.alt = ''; th.title = 'Remove';
+    th.style.cssText = 'width:48px;height:48px;object-fit:contain;cursor:pointer;border:1px solid #ccc;background:#fff';
+    th.onclick = () => removeGif('stickers', g);
+    ed.appendChild(th);
+  });
+}
+
 // ---- sparkles ----
 $('#spark').onchange = e => { P.spark = e.target.checked; save(); };
 $('#sparkc').oninput = e => { P.sparkc = e.target.value; save(); };
@@ -1265,7 +1398,7 @@ function renderAll() {
   $('#adimg').classList.toggle('hidden', !adSrc);
   $('[data-sec="ad"]').classList.toggle('hasimg', !!adSrc);
   if (adSrc) $('#adimg').src = adSrc;
-  renderRows(); renderTop(); renderComments(); renderSong(); applyTheme(); applySecs();
+  renderRows(); renderTop(); renderComments(); renderSong(); renderBlinkies(); renderStickers(); applyTheme(); applySecs();
   $('#fnum').value = P.topn;
   $('#spark').checked = !!P.spark; $('#sparkc').value = /^#[0-9a-f]{6}$/i.test(P.sparkc) ? P.sparkc : '#ff66cc';
   $('#css').value = P.css || '';
