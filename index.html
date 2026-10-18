@@ -1,0 +1,1476 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MySpace</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.1.6/purify.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<style>
+  :root {
+    --page: #e5e5e5; --main: #ffffff; --text: #000000; --link: #003399;
+    --top: #6699cc; --logo: #ffffff; --nav: #003399; --navtext: #ffffff;
+    --box: #6699cc; --boxtext: #ffffff; --lbl: #b1d0f0; --lbltext: #336699; --val: #d5e8fb; --valtext: #000000;
+    --sect: #ffcc99; --secttext: #ff6600; --cmt: #ffcc99; --cmttext: #000000; --cmtwho: #ff9933;
+    --ext: #000000; --name: #000000; --font: Verdana, Arial, sans-serif; --size: 11px; --radius: 0px;
+  }
+  body { margin: 0; background-color: var(--page); background-attachment: fixed; font-family: var(--font); font-size: var(--size); color: var(--text); }
+  a, .link { color: var(--link); text-decoration: none; cursor: pointer; }
+  a:hover, .link:hover { text-decoration: underline; }
+  button, input, select, textarea { font-family: Verdana, sans-serif; font-size: 11px; }
+  .wrap { width: 800px; margin: 0 auto; background: var(--main); border-radius: var(--radius); overflow: hidden; }
+  .top { background: var(--top); padding: 6px 10px; display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+  .logo { font: bold 26px Arial, sans-serif; color: var(--logo); letter-spacing: -1px; }
+  .logo small { font-size: 11px; letter-spacing: 0; font-weight: normal; }
+  .hello { color: var(--logo); }
+  .hello a { color: var(--logo); }
+  .nav { background: var(--nav); padding: 4px 6px; color: var(--navtext); text-align: center; }
+  .nav a { color: var(--navtext); margin: 0 3px; }
+  .ad { min-height: 60px; margin: 8px 10px; border: 1px solid #ccc; display: flex; flex-direction: column; justify-content: center; font: bold 18px Arial; color: #c00; background: #ffe; text-align: center; }
+  .ad.hasimg { border: 0; background: none; min-height: 0; }
+  .ad img { display: block; width: 100%; height: auto; min-width: 0; }
+  .cols { display: flex; gap: 10px; padding: 0 10px 20px; }
+  .left { width: 300px; flex-shrink: 0; }
+  .right { flex: 1; min-width: 0; }
+  h1.name { font-size: 18px; margin: 6px 0; color: var(--name); }
+  .prof { display: flex; gap: 10px; }
+  .pic { width: 170px; height: 170px; object-fit: cover; flex-shrink: 0; }
+  .ph { background: #ddd; border: 1px solid #ccc; }
+  .info { line-height: 1.5; min-width: 0; flex: 1; }
+  .online { color: #0a0; font-weight: bold; }
+  .online i { display: inline-block; width: 8px; height: 8px; background: #3c3; border-radius: 50%; margin-right: 3px; }
+  .box { border: 1px solid var(--box); margin-top: 10px; border-radius: var(--radius); overflow: hidden; }
+  .box h3 { margin: 0; background: var(--box); color: var(--boxtext); font-size: var(--size); padding: 3px 5px; }
+  .box .in { padding: 8px; }
+  .contact { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; padding: 6px; }
+  table.int { width: 100%; border-collapse: separate; border-spacing: 2px; }
+  table.int td { padding: 4px; vertical-align: top; }
+  table.int td.k { width: 80px; background: var(--lbl); color: var(--lbltext); font-weight: bold; }
+  table.int td.v { background: var(--val); color: var(--valtext); }
+  .url { padding: 6px; border: 1px solid var(--box); margin-top: 10px; word-break: break-all; }
+  .ext { border: 1px solid var(--ext); color: var(--ext); padding: 10px; font-size: 16px; font-weight: bold; text-align: center; margin: 8px 0; }
+  .orange { background: var(--sect); color: var(--secttext); font-weight: bold; font-size: 12px; padding: 3px 6px; margin-top: 10px; }
+  .sect { padding: 6px; line-height: 1.5; }
+  .grid8 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; padding: 8px; text-align: center; }
+  .grid8 a { display: block; }
+  .grid8 img { width: 90px; height: 90px; object-fit: cover; display: block; margin: 3px auto 0; }
+  .grid8 .n { color: var(--link); min-height: 1em; word-break: break-word; }
+  .grid8 select { width: 100%; }
+  .comments table { width: 100%; border-collapse: separate; border-spacing: 2px; }
+  .comments td { padding: 6px; vertical-align: top; background: var(--cmt); color: var(--cmttext); word-break: break-word; }
+  .comments td.who { width: 110px; text-align: center; background: var(--cmtwho); }
+  .comments td.who img { width: 90px; height: 90px; object-fit: cover; display: block; margin: 4px auto; }
+  .comments .date { font-weight: bold; margin-bottom: 4px; }
+  .addc { padding: 6px; display: flex; flex-direction: column; gap: 4px; }
+  .addc textarea { height: 60px; }
+  .player { background: #000; color: #fff; padding: 6px; display: flex; align-items: center; gap: 8px; margin-top: 8px; border: 1px solid #333; }
+  .player .t { flex: 1; overflow: hidden; white-space: nowrap; min-height: 14px; }
+  .player marquee { color: #9cf; }
+  .player button { background: #333; color: #fff; border: 1px solid #666; cursor: pointer; padding: 2px 6px; }
+  .plist { background: #111; color: #ccc; border: 1px solid #333; border-top: 0; max-height: 160px; overflow-y: auto; }
+  .plist .pl { padding: 3px 6px; cursor: pointer; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .plist .pl:hover { background: #222; }
+  .plist .pl.on { color: #9cf; font-weight: bold; }
+  .plrow { display: flex; gap: 3px; align-items: center; margin-top: 3px; }
+  .plrow input { flex: 1; min-width: 0; }
+  .plrow button { padding: 0 4px; }
+  .bar { height: 6px; background: #333; margin-top: 3px; }
+  .bar div { height: 100%; width: 0; background: #69c; }
+  .foot { text-align: center; padding: 10px; opacity: .7; border-top: 1px solid #ccc; }
+  .hidden { display: none !important; }
+  .form { display: grid; grid-template-columns: auto 1fr; gap: 6px; align-items: center; }
+  .form input { width: 100%; box-sizing: border-box; }
+  .form button { grid-column: 2; justify-self: start; }
+  .msg { color: #c00; font-weight: bold; min-height: 1em; margin-top: 4px; }
+  .req { display: flex; align-items: center; gap: 8px; padding: 4px 0; }
+  .req img { width: 40px; height: 40px; object-fit: cover; }
+  .modal { position: fixed; inset: 0; background: rgba(0,0,0,.6); z-index: 90; display: flex; align-items: center; justify-content: center; padding: 16px; }
+  .modal.hidden { display: none; }
+  .mbox { background: #fff; color: #000; border: 1px solid #6699cc; width: 360px; max-width: 100%; max-height: 90vh; overflow: auto; font: 11px Verdana, sans-serif; }
+  .mbox.wide { width: 900px; text-align: center; }
+  .mbox h3 { margin: 0; background: #6699cc; color: #fff; font-size: 12px; padding: 4px 6px; }
+  .mbox .in { padding: 8px; display: flex; flex-direction: column; gap: 6px; }
+  .mbox .in img, .mbox .in video { max-width: 100%; max-height: 75vh; align-self: center; }
+  .mbox .row { display: flex; gap: 6px; flex-wrap: wrap; }
+  .ranks { display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px; }
+  .thread { display: flex; flex-direction: column; gap: 6px; padding: 8px 6px; max-height: 60vh; overflow-y: auto; }
+  .bub { max-width: 75%; padding: 6px 8px; background: var(--cmt); color: var(--cmttext); align-self: flex-start; word-break: break-word; }
+  .bub.mine { align-self: flex-end; background: var(--val); color: var(--valtext); }
+  .bub .when { font-size: 9px; opacity: .6; margin-top: 3px; }
+  .conv { display: flex; gap: 6px; align-items: center; padding: 4px; cursor: pointer; }
+  .conv:hover, .conv.on { background: var(--val); }
+  .conv img { width: 36px; height: 36px; object-fit: cover; flex-shrink: 0; }
+  .conv.unread { font-weight: bold; }
+  .conv .pv { opacity: .7; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 200px; font-weight: normal; }
+  .media { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 10px; padding: 8px 0; }
+  .media .it { text-align: center; }
+  .media img, .media video { width: 100%; height: 160px; object-fit: cover; cursor: pointer; background: #000; display: block; }
+  .media .cap { min-height: 1em; margin-top: 3px; word-break: break-word; }
+  .media input { width: 100%; box-sizing: border-box; margin-top: 3px; }
+  .glist a { display: block; padding: 3px 0; }
+  .toast { position: fixed; left: 50%; bottom: 20px; transform: translateX(-50%); background: #000; color: #fff; padding: 8px 14px; font: bold 12px Verdana; z-index: 100; display: none; }
+
+  /* edit mode */
+  .ed { display: none; }
+  body.editing .ed { display: revert; }
+  body.editing .noed { display: none !important; }
+  body.editing [contenteditable="true"] { outline: 1px dashed #f0f; min-height: 1em; min-width: 20px; }
+  body.editing span[contenteditable="true"], body.editing b[contenteditable="true"] { display: inline-block; }
+  body.editing [contenteditable="true"]:empty::before { content: attr(data-ph); opacity: .4; }
+  body.editing img.pick { cursor: pointer; outline: 1px dashed #f0f; }
+  .rowbtn { font-size: 10px; padding: 0 4px; cursor: pointer; }
+
+  .panel { position: fixed; top: 0; right: 0; width: 290px; height: 100vh; overflow-y: auto; background: #f4f4f4; color: #000; border-left: 2px solid #999; font: 11px Verdana, sans-serif; z-index: 50; box-sizing: border-box; padding: 8px; display: none; }
+  body.editing .panel { display: block; }
+  body.editing { margin-right: 290px; }
+  .panel h4 { margin: 10px 0 4px; font-size: 12px; border-bottom: 1px solid #ccc; padding-bottom: 2px; }
+  .panel .grid { display: grid; grid-template-columns: 1fr auto; gap: 3px 6px; align-items: center; }
+  .panel input[type=color] { width: 40px; height: 20px; padding: 0; border: 1px solid #999; }
+  .panel textarea { width: 100%; height: 140px; font: 11px monospace; box-sizing: border-box; }
+  .panel .chk { display: grid; grid-template-columns: 1fr 1fr; gap: 2px; }
+  .panel .btns { display: flex; flex-wrap: wrap; gap: 4px; }
+  .done { position: sticky; top: -8px; background: #f4f4f4; padding: 4px 0; display: flex; gap: 6px; align-items: center; }
+  #saved { color: #666; }
+
+  @media (max-width: 820px) {
+    .wrap { width: 100%; }
+    .cols { flex-direction: column; }
+    .left { width: auto; }
+    body.editing { margin-right: 0; margin-bottom: 50vh; }
+    .panel { width: 100%; height: 50vh; top: auto; bottom: 0; border-left: 0; border-top: 2px solid #999; }
+    .grid8 img { width: 70px; height: 70px; }
+  }
+</style>
+<style id="custom"></style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <a class="logo" href="#/">myspace.com <small>a place for friends</small></a>
+    <div class="hello" id="hello"></div>
+  </div>
+  <div class="nav" id="nav">
+    <a href="#/">Home</a> | <a href="#/browse">Browse</a> | <a href="#" id="nav-me">Profile</a> | <a href="#/edit">Edit Profile</a> | <a href="#/mail">Mail<span id="nav-unread"></span></a> | <a href="#/groups">Groups</a> | <a href="#" id="nav-out">Log Out</a>
+  </div>
+
+  <!-- ================= LOGGED OUT ================= -->
+  <div id="v-login" class="cols hidden" style="padding-top:10px">
+    <div class="left">
+      <div class="box">
+        <h3>Member Login</h3>
+        <div class="in form">
+          <span>Username</span><input id="li-u" autocomplete="username">
+          <span>Password</span><input id="li-p" type="password" autocomplete="current-password">
+          <button id="li-go">Log In</button>
+        </div>
+        <div class="in msg" id="li-msg"></div>
+      </div>
+    </div>
+    <div class="right">
+      <div class="box">
+        <h3>Sign Up</h3>
+        <div class="in form">
+          <span>Invite code</span><input id="su-c">
+          <span>Username</span><input id="su-u" autocomplete="username">
+          <span>Password</span><input id="su-p" type="password" autocomplete="new-password">
+          <button id="su-go">Sign Up</button>
+        </div>
+        <div class="in msg" id="su-msg"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= HOME ================= -->
+  <div id="v-home" class="cols hidden" style="padding-top:10px">
+    <div class="left">
+      <div class="box">
+        <h3>Hello, <span id="h-name"></span>!</h3>
+        <div class="in prof">
+          <a id="h-piclink"><img class="pic" id="h-pic" alt="" style="width:120px;height:120px"></a>
+          <div class="info">
+            <a id="h-view">View My Profile</a><br>
+            <a href="#/edit">Edit Profile</a><br>
+            <a href="#/mail">Mail</a> <b id="h-unread" style="color:#c00"></b><br>
+            <a id="h-pics">My Pics</a> | <a id="h-vids">My Videos</a><br>
+            <a href="#/groups">Groups</a><br><br>
+            <b>My URL:</b><br><span id="h-url" style="word-break:break-all"></span>
+          </div>
+        </div>
+      </div>
+      <div class="box" id="h-reqbox">
+        <h3>Friend Requests</h3>
+        <div class="in" id="h-reqs"></div>
+      </div>
+    </div>
+    <div class="right">
+      <div class="orange">My Friend Space</div>
+      <div class="grid8" id="h-friends"></div>
+      <div id="h-favbox">
+        <div class="orange">My Favorites</div>
+        <div class="grid8" id="h-favs"></div>
+      </div>
+      <div class="orange">Cool New People</div>
+      <div class="grid8" id="h-new"></div>
+    </div>
+  </div>
+
+  <!-- ================= MAIL ================= -->
+  <div id="v-mail" class="hidden" style="padding:10px">
+    <div class="cols" style="padding:0">
+      <div class="left">
+        <div class="box">
+          <h3>Mail</h3>
+          <div class="in" id="m-list"></div>
+        </div>
+        <div class="box">
+          <h3>New Message</h3>
+          <div class="in"><select id="m-to" style="width:100%"></select></div>
+        </div>
+      </div>
+      <div class="right">
+        <div class="orange" id="m-title"></div>
+        <div id="m-thread" class="thread"></div>
+        <div class="addc hidden" id="m-compose">
+          <textarea id="m-text" placeholder="Message"></textarea>
+          <button id="m-send">Send</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= GROUPS ================= -->
+  <div id="v-groups" class="hidden" style="padding:10px">
+    <div class="cols" style="padding:0">
+      <div class="left">
+        <div class="box">
+          <h3>Make a Group</h3>
+          <div class="in form"><span>Name</span><input id="g-newname"><button id="g-create">Create</button></div>
+        </div>
+      </div>
+      <div class="right">
+        <div class="orange">My Groups</div>
+        <div class="sect" id="g-mine"></div>
+        <div class="orange">All Groups</div>
+        <div class="sect" id="g-all"></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="v-group" class="hidden" style="padding:10px">
+    <h1 class="name" id="gp-name"></h1>
+    <div class="sect">
+      <button id="gp-join">Join</button> <button id="gp-leave">Leave</button>
+      <button id="gp-rename">Rename</button> <button id="gp-delete">Delete Group</button>
+    </div>
+    <div class="orange">Members (<span id="gp-count"></span>)</div>
+    <div class="grid8" id="gp-members"></div>
+    <div class="orange">Group Board</div>
+    <div class="addc" id="gp-compose">
+      <textarea id="gp-text" placeholder="Post"></textarea>
+      <button id="gp-post">Post</button>
+    </div>
+    <div class="comments"><table id="gp-posts"></table></div>
+  </div>
+
+  <!-- ================= PICS / VIDEOS / FRIENDS of a profile ================= -->
+  <div id="v-media" class="hidden" style="padding:10px">
+    <div class="sect"><a id="md-back"></a></div>
+    <div class="orange" id="md-title"></div>
+    <div class="sect" id="md-tools">
+      <button id="md-upload">Upload</button>
+    </div>
+    <div class="media" id="md-grid"></div>
+  </div>
+
+  <!-- ================= BROWSE ================= -->
+  <div id="v-browse" class="hidden" style="padding:10px">
+    <div class="orange">Browse Users</div>
+    <div class="grid8" id="b-all" style="grid-template-columns:repeat(auto-fill,minmax(110px,1fr))"></div>
+  </div>
+
+  <!-- ================= PROFILE ================= -->
+  <div id="v-profile" class="hidden">
+    <div class="ad" data-sec="ad"><img class="pick hidden" id="adimg" alt=""><span data-k="ad" data-ph="Banner text"></span></div>
+
+    <div class="cols">
+      <div class="left">
+        <h1 class="name" data-k="name" data-ph="Name"></h1>
+        <div class="prof">
+          <img class="pic pick" id="mepic" alt="">
+          <div class="info">
+            <div data-k="headline" data-ph="Headline"></div><br>
+            <div data-k="sex" data-ph="Gender"></div>
+            <div data-k="age" data-ph="Age"></div>
+            <div data-k="loc" data-ph="Location"></div><br>
+            <div class="online" data-sec="online"><i></i><span data-k="online" data-def="Online Now!" data-ph="Online text"></span></div><br>
+            <div data-sec="login"><span data-k="loginlbl" data-def="Last Login:" data-ph="Label"></span> <span data-k="login" data-def="%l" data-ph="Date"></span></div>
+          </div>
+        </div>
+        <div style="margin-top:6px" data-sec="viewmy"><span data-k="viewmy" data-def="View My:" data-ph="Label"></span> <span class="link" data-k="vm_pics" data-act="pics" data-def="Pics" data-ph="Pics"></span> | <span class="link" data-k="vm_vids" data-act="videos" data-def="Videos" data-ph="Videos"></span></div>
+
+        <div class="box" data-sec="contact">
+          <h3 data-k="h_contact" data-def="Contacting %n" data-ph="Heading"></h3>
+          <div class="contact">
+            <span class="link" data-k="c1" data-act="message" data-def="Send Message"></span><span class="link" data-k="c2" data-act="forward" data-def="Forward to Friend"></span>
+            <span class="link" data-k="c3" data-act="friend" data-def="Add to Friends"></span><span class="link" data-k="c4" data-act="fav" data-def="Add to Favorites"></span>
+            <span class="link" data-k="c5" data-act="im" data-def="Instant Message"></span><span class="link" data-k="c6" data-act="block" data-def="Block User"></span>
+            <span class="link" data-k="c7" data-act="group" data-def="Add to Group"></span><span class="link" data-k="c8" data-act="rank" data-def="Rank User"></span>
+          </div>
+          <div class="noed" id="p-status" style="padding:0 6px 6px"></div>
+        </div>
+
+        <div class="url" data-sec="url"><b data-k="urllbl" data-def="MySpace URL:"></b><br><span data-k="url" data-def="%u" data-ph="URL"></span></div>
+
+        <div data-sec="player">
+          <div class="player">
+            <button id="prev">&#9664;&#9664;</button>
+            <button id="play">&#9654;</button>
+            <button id="next">&#9654;&#9654;</button>
+            <div class="t">
+              <marquee scrollamount="3" id="song"></marquee>
+              <div class="bar"><div id="prog"></div></div>
+            </div>
+          </div>
+          <div class="plist hidden" id="plist"></div>
+        </div>
+
+        <div class="box" data-sec="interests">
+          <h3 data-k="h_int" data-def="%n's Interests" data-ph="Heading"></h3>
+          <table class="int" data-rows="interests"></table>
+          <div class="ed" style="padding:4px"><button class="rowbtn" data-add="interests">Add row</button></div>
+        </div>
+
+        <div class="box" data-sec="details">
+          <h3 data-k="h_det" data-def="%n's Details" data-ph="Heading"></h3>
+          <table class="int" data-rows="details"></table>
+          <div class="ed" style="padding:4px"><button class="rowbtn" data-add="details">Add row</button></div>
+        </div>
+      </div>
+
+      <div class="right">
+        <div class="ext" data-sec="ext" data-k="ext" data-def="%n is in your extended network" data-ph="Network box"></div>
+
+        <div data-sec="blog">
+          <div class="orange" data-k="h_blog" data-def="%n's Latest Blog Entry" data-ph="Heading"></div>
+          <div class="sect" data-k="blog" data-ph="Blog"></div>
+        </div>
+
+        <div data-sec="blurbs">
+          <div class="orange" data-k="h_blurbs" data-def="%n's Blurbs" data-ph="Heading"></div>
+          <div class="sect">
+            <b data-k="about_l" data-def="About me:"></b>
+            <div data-k="about" data-ph="About me"></div>
+            <br><b data-k="meet_l" data-def="Who I'd like to meet:"></b>
+            <div data-k="meet" data-ph="Who I'd like to meet"></div>
+          </div>
+        </div>
+
+        <div data-sec="friends">
+          <div class="orange" data-k="h_friends" data-def="%n's Friend Space" data-ph="Heading"></div>
+          <div class="sect"><b><span data-k="fcount" data-def="%n has %f friends." data-ph="Friend count"></span></b></div>
+          <div class="grid8" id="top8"></div>
+          <div class="sect noed" style="text-align:right"><a id="p-allfriends"></a></div>
+        </div>
+
+        <div data-sec="comments">
+          <div class="orange" data-k="h_comments" data-def="%n's Friends Comments" data-ph="Heading"></div>
+          <div class="sect">Displaying <span id="ccount">0</span> of <span id="ccount2">0</span> comments</div>
+          <div class="comments"><table id="ctable"></table></div>
+          <div class="addc noed">
+            <textarea id="ctext" placeholder="Comment"></textarea>
+            <button id="cpost">Post Comment</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="foot">&copy; 2003-2006 MySpace.com. All Rights Reserved.</div>
+</div>
+<audio id="aud"></audio>
+<div class="toast" id="toast"></div>
+<div class="modal hidden" id="modal"><div class="mbox"><h3 id="modal-title"></h3><div class="in" id="modal-body"></div></div></div>
+
+<div class="panel">
+  <div class="done"><button id="done"><b>Done</b></button><span id="saved"></span></div>
+
+  <h4>Colors</h4>
+  <div class="grid" id="colors"></div>
+
+  <h4>Text</h4>
+  <div class="grid">
+    <span>Font</span>
+    <select id="font">
+      <option value="Verdana, Arial, sans-serif">Verdana</option>
+      <option value="Arial, sans-serif">Arial</option>
+      <option value="Tahoma, sans-serif">Tahoma</option>
+      <option value="'Trebuchet MS', sans-serif">Trebuchet</option>
+      <option value="Georgia, serif">Georgia</option>
+      <option value="'Times New Roman', serif">Times</option>
+      <option value="'Courier New', monospace">Courier</option>
+      <option value="'Comic Sans MS', cursive">Comic Sans</option>
+      <option value="Impact, sans-serif">Impact</option>
+      <option value="'Lucida Console', monospace">Lucida Console</option>
+      <option value="'Segoe Script', cursive">Segoe Script</option>
+      <option value="'Palatino Linotype', serif">Palatino</option>
+    </select>
+    <span>Size</span><input type="number" id="size" min="8" max="20">
+    <span>Rounded corners</span><input type="number" id="radius" min="0" max="40">
+  </div>
+
+  <h4>Pictures</h4>
+  <div class="btns">
+    <button id="mepicbtn">Profile picture</button>
+    <button id="bgpic">Background</button>
+    <button id="bgclear">Remove background</button>
+    <select id="bgmode"><option value="tile">Tile</option><option value="cover">Stretch</option><option value="center">Center</option></select>
+    <button id="adpic">Banner picture</button>
+    <button id="adclear">Remove banner picture</button>
+  </div>
+
+  <h4>Top Friends</h4>
+  <div class="grid"><span>How many</span><input type="number" id="fnum" min="0" max="40"></div>
+
+  <h4>Playlist</h4>
+  <div class="btns"><button id="songpick">Add songs</button></div>
+  <div id="pl-edit"></div>
+  <div class="grid" style="margin-top:4px">
+    <span>Autoplay</span><input type="checkbox" id="autoplay">
+  </div>
+
+  <h4>Show</h4>
+  <div class="chk" id="secs"></div>
+
+  <h4>Cursor sparkles</h4>
+  <div class="grid"><span>On</span><input type="checkbox" id="spark"><span>Color</span><input type="color" id="sparkc"></div>
+
+  <h4>Custom CSS</h4>
+  <textarea id="css" spellcheck="false"></textarea>
+
+  <h4>Reset</h4>
+  <div class="btns">
+    <button id="reset">Clear profile</button>
+    <button id="delacct">Delete account</button>
+  </div>
+</div>
+
+<input type="file" id="imgfile" accept="image/png,image/jpeg,image/gif,image/webp" hidden>
+<input type="file" id="songfile" accept="audio/*" multiple hidden>
+
+<script>
+const $ = s => document.querySelector(s), $$ = s => document.querySelectorAll(s);
+const esc = s => String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+const clean = html => window.DOMPurify
+  ? DOMPurify.sanitize(html || '', { ADD_TAGS: ['marquee'], FORBID_TAGS: ['form', 'input', 'button', 'textarea', 'select', 'style'] })
+  : esc(String(html || '').replace(/<[^>]*>/g, ''));
+const strip = html => { const d = document.createElement('div'); d.innerHTML = clean(html); return d.textContent.trim(); };
+const BLANK = 'data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="1" height="1"><rect width="1" height="1" fill="#ddd"/></svg>');
+
+let ME = null;          // { u, friends, requests, favs, blocked, unread }
+let USERS = {};         // { u: { name, pic, created, last } }
+let V = null;           // profile being viewed: { u, P, friends, comments, last, isFriend, requested, rank... }
+let P = null;           // V.P shortcut
+let UID = null;         // logged-in user's id (their storage folder)
+
+const SUPA_URL = 'https://ejxfdvzsgezwjkauszox.supabase.co';
+const sb = supabase.createClient(SUPA_URL, 'sb_publishable__XpICNasyq536q6XM3-YMg_EHEhFQhD');
+// accounts are username + password; supabase wants an email, so each username gets a made-up one
+const EMAIL = u => u + '@myspace-rawr.com';
+const ERRORS = { 'Invalid login credentials': 'Wrong username or password', 'Database error saving new user': 'Could not sign up' };
+async function q(promise) {
+  const { data, error } = await promise;
+  if (error) throw new Error(ERRORS[error.message] || error.message);
+  return data;
+}
+const rpc = (fn, args) => q(sb.rpc(fn, args));
+const fileURL = path => path ? `${SUPA_URL}/storage/v1/object/public/media/${path}` : null;
+const EXT = { 'image/png': 'png', 'image/jpeg': 'jpg', 'image/gif': 'gif', 'image/webp': 'webp', 'video/mp4': 'mp4', 'video/webm': 'webm', 'video/quicktime': 'mov', 'audio/mpeg': 'mp3', 'audio/mp4': 'm4a', 'audio/x-m4a': 'm4a', 'audio/wav': 'wav', 'audio/ogg': 'ogg' };
+async function putFile(prefix, blob) {
+  const path = `${UID}/${prefix}_${Math.random().toString(36).slice(2, 12)}.${EXT[blob.type] || 'bin'}`;
+  await q(sb.storage.from('media').upload(path, blob, { contentType: blob.type, cacheControl: '31536000' }));
+  return path;
+}
+function dropFile(path) { if (path) sb.storage.from('media').remove([path]).catch(() => {}); }
+async function dropAllFiles() {
+  const files = await q(sb.storage.from('media').list(UID, { limit: 1000 }));
+  if (files.length) await sb.storage.from('media').remove(files.map(f => UID + '/' + f.name));
+}
+function toast(t) { const el = $('#toast'); el.textContent = t; el.style.display = 'block'; clearTimeout(toast.t); toast.t = setTimeout(() => el.style.display = 'none', 2500); }
+const userPic = u => USERS[u] && fileURL(USERS[u].pic);
+const userName = u => (USERS[u] && USERS[u].name) || u;
+function setImg(el, src) { el.src = src || BLANK; el.classList.toggle('ph', !src); }
+const profURL = u => location.origin + location.pathname + '#/u/' + u;
+function fmtDate(t) {
+  const d = new Date(t);
+  return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }).replace(',', '') + ' ' + d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+}
+function friendCard(u) {
+  const a = document.createElement('a');
+  a.href = '#/u/' + encodeURIComponent(u);
+  a.innerHTML = `<div class="n"></div><img alt="">`;
+  a.firstChild.textContent = userName(u);
+  setImg(a.lastChild, userPic(u));
+  return a;
+}
+
+const enc = encodeURIComponent;
+const setMe = r => ['friends', 'requests', 'favs', 'blocked'].forEach(k => { if (r[k]) ME[k] = r[k]; });
+function btn(text, fn) { const b = document.createElement('button'); b.textContent = text; b.onclick = fn; return b; }
+function modal(title, build, wide) {
+  $('#modal-title').textContent = title;
+  const b = $('#modal-body');
+  b.innerHTML = '';
+  $('#modal .mbox').classList.toggle('wide', !!wide);
+  $('#modal').classList.remove('hidden');
+  build(b, closeModal);
+}
+function closeModal() { $('#modal').classList.add('hidden'); $('#modal-body').innerHTML = ''; }
+$('#modal').onclick = e => { if (e.target.id === 'modal') closeModal(); };
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+
+// one row of a comment-style table (profile comments + group board)
+function postRow(c, canDelete, onDelete) {
+  const tr = document.createElement('tr');
+  tr.innerHTML = `<td class="who"><a></a><a><img alt=""></a></td><td><div class="date"></div><div class="body"></div></td>`;
+  const links = tr.querySelectorAll('a');
+  links[0].textContent = userName(c.from);
+  links.forEach(a => a.href = '#/u/' + enc(c.from));
+  setImg(tr.querySelector('img'), userPic(c.from));
+  tr.querySelector('.date').textContent = fmtDate(c.at);
+  tr.querySelector('.body').innerHTML = clean(c.text.replace(/\n/g, '<br>'));
+  if (canDelete) {
+    const x = btn('Delete', async () => { if (confirm('Delete this?')) { try { await onDelete(); } catch (e) { toast(e.message); } } });
+    x.className = 'rowbtn';
+    tr.children[1].append(document.createElement('br'), x);
+  }
+  return tr;
+}
+
+// ======================= ROUTING =======================
+const VIEWS = ['v-login', 'v-home', 'v-browse', 'v-profile', 'v-mail', 'v-groups', 'v-group', 'v-media'];
+function show(id) {
+  VIEWS.forEach(v => $('#' + v).classList.toggle('hidden', v !== id));
+  $('#nav').classList.toggle('hidden', !ME);
+  $('#hello').innerHTML = ME ? `Hello, ${esc(userName(ME.u))}! | <a href="#" id="hello-out">Log Out</a>` : '';
+  if (ME) { $('#nav-me').href = '#/u/' + enc(ME.u); $('#hello-out').onclick = logout; }
+  updateUnread();
+}
+function updateUnread() {
+  const n = ME ? ME.unread : 0;
+  $('#nav-unread').textContent = n ? ` (${n})` : '';
+  $('#h-unread').textContent = n ? `(${n} new)` : '';
+}
+let pollT = null;
+async function route() {
+  setEditing(false, true);
+  stopSong();
+  resetTheme();
+  closeModal();
+  clearInterval(pollT);
+  window.scrollTo(0, 0);
+  const h = location.hash.replace(/^#\/?/, '');
+  if (!ME) return show('v-login');
+  const [page, arg, sub] = h.split('/');
+  const a = arg && decodeURIComponent(arg);
+  if (page === 'u' && a) return sub ? openMedia(a.toLowerCase(), sub) : openProfile(a.toLowerCase(), false);
+  if (page === 'edit') return openProfile(ME.u, true);
+  if (page === 'browse') return renderBrowse();
+  if (page === 'mail') return openMail(a ? a.toLowerCase() : null);
+  if (page === 'groups') return renderGroups();
+  if (page === 'g' && a) return openGroup(a);
+  renderHome();
+}
+window.addEventListener('hashchange', route);
+
+async function loadUsers() {
+  const rows = await q(sb.from('profiles').select('username,name,pic,created,last'));
+  USERS = {};
+  rows.forEach(r => USERS[r.username] = { name: r.name, pic: r.pic, created: Date.parse(r.created), last: Date.parse(r.last) });
+}
+async function refreshMe() {
+  try {
+    const { data } = await sb.auth.getSession();
+    if (!data.session) { ME = null; return; }
+    UID = data.session.user.id;
+    ME = await rpc('me_info');
+    await loadUsers();
+  } catch (e) { ME = null; }
+}
+// keeps "Online Now" true and the mail count fresh
+setInterval(async () => {
+  if (!ME) return;
+  try { ME = await rpc('me_info'); updateUnread(); } catch (e) {}
+}, 60000);
+async function logout(e) {
+  if (e) e.preventDefault();
+  try { await sb.auth.signOut(); } catch (err) {}
+  ME = null; location.hash = '#/'; route();
+}
+$('#nav-out').onclick = logout;
+
+// ======================= LOGIN / SIGNUP =======================
+async function doAuth(kind) {
+  const pre = kind === 'login' ? 'li' : 'su';
+  const msg = $(`#${pre}-msg`);
+  msg.textContent = '';
+  try {
+    const u = $(`#${pre}-u`).value.trim().toLowerCase(), pw = $(`#${pre}-p`).value;
+    if (kind === 'signup') {
+      const invite = $('#su-c').value;
+      const err = await rpc('check_signup', { uname: u, invite });
+      if (err) throw new Error(err);
+      if (pw.length < 6) throw new Error('Password needs at least 6 characters');
+      await q(sb.auth.signUp({ email: EMAIL(u), password: pw, options: { data: { username: u, invite } } }));
+    } else {
+      if (!u) throw new Error('Wrong username or password');
+      await q(sb.auth.signInWithPassword({ email: EMAIL(u), password: pw }));
+    }
+    await refreshMe();
+    location.hash = kind === 'signup' ? '#/edit' : '#/';
+    route();
+  } catch (e) { msg.textContent = e.message; }
+}
+$('#li-go').onclick = () => doAuth('login');
+$('#su-go').onclick = () => doAuth('signup');
+$('#li-p').onkeydown = e => { if (e.key === 'Enter') doAuth('login'); };
+$('#su-p').onkeydown = e => { if (e.key === 'Enter') doAuth('signup'); };
+
+// ======================= HOME / BROWSE =======================
+function renderHome() {
+  show('v-home');
+  $('#h-name').textContent = userName(ME.u);
+  setImg($('#h-pic'), userPic(ME.u));
+  $('#h-piclink').href = $('#h-view').href = '#/u/' + encodeURIComponent(ME.u);
+  $('#h-url').textContent = profURL(ME.u);
+
+  const reqs = $('#h-reqs');
+  reqs.innerHTML = '';
+  $('#h-reqbox').classList.toggle('hidden', !ME.requests.length);
+  ME.requests.forEach(u => {
+    const row = document.createElement('div');
+    row.className = 'req';
+    row.innerHTML = `<img alt=""><a></a><button>Approve</button><button>Deny</button>`;
+    setImg(row.children[0], userPic(u));
+    row.children[1].textContent = userName(u);
+    row.children[1].href = '#/u/' + encodeURIComponent(u);
+    row.children[2].onclick = async () => { try { setMe(await rpc('friend_action', { act: 'accept', target: u })); } catch (e) { toast(e.message); } renderHome(); };
+    row.children[3].onclick = async () => { try { setMe(await rpc('friend_action', { act: 'decline', target: u })); } catch (e) { toast(e.message); } renderHome(); };
+    reqs.appendChild(row);
+  });
+
+  $('#h-pics').href = '#/u/' + enc(ME.u) + '/pics';
+  $('#h-vids').href = '#/u/' + enc(ME.u) + '/videos';
+
+  const fr = $('#h-friends');
+  fr.innerHTML = '';
+  ME.friends.forEach(u => fr.appendChild(friendCard(u)));
+
+  const fv = $('#h-favs');
+  fv.innerHTML = '';
+  $('#h-favbox').classList.toggle('hidden', !ME.favs.length);
+  ME.favs.filter(u => USERS[u]).forEach(u => fv.appendChild(friendCard(u)));
+
+  const nw = $('#h-new');
+  nw.innerHTML = '';
+  Object.keys(USERS).filter(u => u !== ME.u).sort((a, b) => (USERS[b].created || 0) - (USERS[a].created || 0)).slice(0, 8).forEach(u => nw.appendChild(friendCard(u)));
+}
+function renderBrowse() {
+  show('v-browse');
+  const g = $('#b-all');
+  g.innerHTML = '';
+  Object.keys(USERS).sort((a, b) => userName(a).localeCompare(userName(b))).forEach(u => g.appendChild(friendCard(u)));
+}
+
+// ======================= PROFILE =======================
+const DEFAULT_ROWS = () => ({
+  interests: ['General', 'Music', 'Movies', 'Television', 'Books', 'Heroes'].map(k => ({ k, v: '' })),
+  details: ['Status:', 'Here for:', 'Hometown:', 'Zodiac Sign:', 'Smoke / Drink:'].map(k => ({ k, v: '' }))
+});
+function normalize(p) {
+  p.text ??= {}; p.theme ??= {}; p.hide ??= {}; p.files ??= {};
+  p.rows ??= DEFAULT_ROWS();
+  p.top ??= []; p.topn ??= 8;
+  p.sparkc ??= '#ff66cc'; p.bgmode ??= 'tile';
+  p.album ??= []; p.videos ??= []; p.songs ??= [];
+  return p;
+}
+async function loadComments(u) {
+  const rows = await q(sb.from('comments').select('id,from_u,body,at').eq('owner', u).order('at', { ascending: false }).limit(500));
+  return rows.map(c => ({ id: c.id, from: c.from_u, text: c.body, at: Date.parse(c.at) }));
+}
+async function loadProfile(u) {
+  const d = await rpc('get_profile', { target: u });
+  V = { ...d, last: Date.parse(d.last), comments: await loadComments(d.u), P: normalize(d.data || {}) };
+  P = V.P;
+}
+async function openProfile(u, edit) {
+  try { await loadProfile(u); }
+  catch (e) { renderHome(); toast(e.message); return; }
+  if (edit) { await loadUsers().catch(() => {}); ME = await rpc('me_info').catch(() => ME); }
+  show('v-profile');
+  $('#saved').textContent = '';
+  setEditing(edit && u === ME.u);
+  if (!edit) startSong();
+}
+const own = () => V && ME && V.u === ME.u;
+const editing = () => document.body.classList.contains('editing');
+
+let saveT;
+function save(delay = 700) {
+  if (!own()) return;
+  $('#saved').textContent = 'Saving...';
+  clearTimeout(saveT);
+  saveT = setTimeout(async () => {
+    try {
+      await q(sb.from('profiles').update({ data: P, name: strip(P.text.name) || ME.u }).eq('id', UID));
+      $('#saved').textContent = 'Saved';
+      USERS[ME.u] = { ...(USERS[ME.u] || {}), name: strip(P.text.name) || ME.u };
+    } catch (e) { $('#saved').textContent = e.message; }
+  }, delay);
+}
+
+function fillTexts() {
+  const n = strip(P.text.name) || V.u;
+  const subs = { n: esc(n), f: V.friends.length, u: esc(profURL(V.u)), l: esc(V.last ? new Date(V.last).toLocaleDateString('en-US') : '') };
+  $$('#v-profile [data-k]').forEach(el => {
+    if (el === document.activeElement) return;
+    const k = el.dataset.k;
+    el.innerHTML = P.text[k] != null ? clean(P.text[k]) : (el.dataset.def || '').replace(/%([nful])/g, (m, c) => subs[c]);
+  });
+  document.title = 'MySpace.com - ' + n;
+}
+$$('#v-profile [data-k]').forEach(el => {
+  el.addEventListener('input', () => {
+    if (!editing()) return;
+    P.text[el.dataset.k] = el.innerHTML;
+    if (el.dataset.k === 'name') fillTexts();
+    save();
+  });
+  if (el.dataset.act) el.addEventListener('click', () => !editing() && contactAction(el.dataset.act));
+});
+async function contactAction(act) {
+  const n = strip(P.text.name) || V.u;
+  if (act === 'pics' || act === 'videos') { location.hash = '#/u/' + enc(V.u) + '/' + act; return; }
+  if (own()) return toast("That's you");
+  try {
+    if (act === 'message' || act === 'im') { location.hash = '#/mail/' + enc(V.u); return; }
+
+    if (act === 'friend') {
+      if (V.isFriend) {
+        if (!confirm(`Remove ${n} from your friends?`)) return;
+        setMe(await rpc('friend_action', { act: 'unfriend', target: V.u }));
+        V.isFriend = false; V.friends = V.friends.filter(u => u !== ME.u);
+        renderAll(); toast('Removed from friends');
+        return;
+      }
+      const r = await rpc('friend_action', { act: 'friend', target: V.u });
+      setMe(r);
+      if (r.status === 'friends') { V.isFriend = true; V.friends.push(ME.u); renderAll(); toast('You are now friends'); }
+      else { V.requested = true; renderStatus(); toast('Friend request sent'); }
+    }
+
+    if (act === 'fav') {
+      const r = await rpc('friend_action', { act: 'fav', target: V.u });
+      setMe(r); renderStatus();
+      toast(r.status === 'faved' ? 'Added to favorites' : 'Removed from favorites');
+    }
+
+    if (act === 'block') {
+      const was = ME.blocked.includes(V.u);
+      if (!confirm(was ? `Unblock ${n}?` : `Block ${n}? They won't be able to message you, comment, or add you.`)) return;
+      const r = await rpc('friend_action', { act: 'block', target: V.u });
+      setMe(r);
+      if (r.status === 'blocked') { V.isFriend = false; V.friends = V.friends.filter(u => u !== ME.u); }
+      renderAll(); toast(r.status === 'blocked' ? 'Blocked' : 'Unblocked');
+    }
+
+    if (act === 'forward') {
+      const fr = ME.friends.filter(u => u !== V.u);
+      modal('Forward to Friend', (b, close) => {
+        if (!fr.length) { b.append('No friends to send it to yet'); b.appendChild(btn('Close', close)); return; }
+        const sel = document.createElement('select');
+        sel.innerHTML = fr.map(u => `<option value="${esc(u)}">${esc(userName(u))}</option>`).join('');
+        const row = document.createElement('div'); row.className = 'row';
+        row.append(btn('Send', async () => {
+          try {
+            await rpc('send_mail', { target: sel.value, body: `Check out <a href="#/u/${esc(V.u)}">${esc(n)}</a>'s profile` });
+            close(); toast('Sent');
+          } catch (e) { toast(e.message); }
+        }), btn('Cancel', close));
+        b.append(sel, row);
+      });
+    }
+
+    if (act === 'group') {
+      const all = await loadGroups();
+      const mine = Object.entries(all).filter(([, g]) => g.members.includes(ME.u));
+      modal('Add to Group', (b, close) => {
+        if (!mine.length) {
+          b.append('You are not in any groups yet');
+          b.appendChild(btn('Make a Group', () => { location.hash = '#/groups'; }));
+          return;
+        }
+        mine.forEach(([id, g]) => {
+          const inIt = g.members.includes(V.u);
+          const x = btn(g.name + (inIt ? ' (already in)' : ''), async () => {
+            try { await rpc('group_action', { gid: id, act: 'add', arg: V.u }); close(); toast('Added to ' + g.name); } catch (e) { toast(e.message); }
+          });
+          x.disabled = inIt;
+          b.appendChild(x);
+        });
+        b.appendChild(btn('Cancel', close));
+      });
+    }
+
+    if (act === 'rank') {
+      modal('Rank ' + n, (b, close) => {
+        const g = document.createElement('div'); g.className = 'ranks';
+        for (let i = 1; i <= 10; i++) {
+          const x = btn(i, async () => {
+            try { Object.assign(V, await rpc('rank_user', { target: V.u, score: i })); renderStatus(); close(); toast('Ranked ' + i + '/10'); }
+            catch (e) { toast(e.message); }
+          });
+          if (V.myRank === i) x.style.fontWeight = 'bold';
+          g.appendChild(x);
+        }
+        b.append(g, btn('Cancel', close));
+      });
+    }
+  } catch (e) { toast(e.message); }
+}
+function renderStatus() {
+  const bits = [];
+  if (V.rankCount) bits.push(`Rank: ${V.rank.toFixed(1)}/10 (${V.rankCount})`);
+  if (!own()) {
+    if (V.isFriend) bits.push('Friends');
+    else if (V.requested) bits.push('Request sent');
+    if (ME.favs.includes(V.u)) bits.push('Favorite');
+    if (ME.blocked.includes(V.u)) bits.push('Blocked');
+  }
+  $('#p-status').textContent = bits.join(' | ');
+}
+
+function renderRows() {
+  $$('[data-rows]').forEach(t => {
+    const key = t.dataset.rows;
+    t.innerHTML = '';
+    P.rows[key].forEach((r, i) => {
+      if (!editing() && !strip(r.k) && !strip(r.v)) return;
+      const tr = document.createElement('tr');
+      tr.innerHTML = `<td class="k" data-ph="Label"></td><td class="v" data-ph="Text"></td>`;
+      const [k, v] = tr.children;
+      k.innerHTML = clean(r.k); v.innerHTML = clean(r.v);
+      if (editing()) {
+        k.contentEditable = v.contentEditable = true;
+        k.oninput = () => { r.k = k.innerHTML; save(); };
+        v.oninput = () => { r.v = v.innerHTML; save(); };
+        const td = document.createElement('td');
+        td.innerHTML = '<button class="rowbtn">Remove</button>';
+        td.firstChild.onclick = () => { P.rows[key].splice(i, 1); save(); renderRows(); };
+        tr.appendChild(td);
+      }
+      t.appendChild(tr);
+    });
+  });
+}
+$$('[data-add]').forEach(b => b.onclick = () => { P.rows[b.dataset.add].push({ k: '', v: '' }); save(); renderRows(); });
+
+// ---- pictures ----
+let imgTarget = null;
+const imgfile = $('#imgfile');
+function pickImg(target) { imgTarget = target; imgfile.click(); }
+function shrink(f, max) {
+  return new Promise((res, rej) => {
+    if (f.type === 'image/gif') return f.size <= 2.9e6 ? res(f) : rej(new Error('GIF is too big (max 3MB)'));
+    const img = new Image();
+    img.onload = () => {
+      const s = Math.min(1, max / Math.max(img.width, img.height));
+      const c = document.createElement('canvas'); c.width = Math.round(img.width * s); c.height = Math.round(img.height * s);
+      c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+      const png = f.type === 'image/png' && c.width * c.height < 600000;
+      c.toBlob(b => b ? res(b) : rej(new Error('Could not read picture')), png ? 'image/png' : 'image/jpeg', 0.88);
+    };
+    img.onerror = () => rej(new Error('Could not read picture'));
+    img.src = URL.createObjectURL(f);
+  });
+}
+async function setPic(path) {
+  await q(sb.from('profiles').update({ pic: path }).eq('id', UID));
+  USERS[ME.u] = { ...(USERS[ME.u] || {}), pic: path };
+}
+async function upload(key, blob) {
+  $('#saved').textContent = 'Uploading...';
+  try {
+    const path = await putFile(key, blob);
+    const old = P.files[key];
+    P.files[key] = path;
+    if (key === 'me') await setPic(path);
+    save(0);
+    dropFile(old);
+    renderAll();
+  } catch (e) { $('#saved').textContent = e.message; toast(e.message); }
+}
+async function removeFile(key) {
+  try {
+    const old = P.files[key];
+    delete P.files[key];
+    if (key === 'me') await setPic(null);
+    save(0);
+    dropFile(old);
+    renderAll();
+  } catch (e) { toast(e.message); }
+}
+imgfile.onchange = async () => {
+  const f = imgfile.files[0]; imgfile.value = '';
+  if (!f) return;
+  try { await upload(imgTarget, await shrink(f, imgTarget === 'bg' ? 1600 : imgTarget === 'ad' ? 1400 : 400)); }
+  catch (e) { toast(e.message); }
+};
+$('#mepic').onclick = () => editing() && pickImg('me');
+$('#mepicbtn').onclick = () => pickImg('me');
+$('#bgpic').onclick = () => pickImg('bg');
+$('#bgclear').onclick = () => removeFile('bg');
+$('#adpic').onclick = () => pickImg('ad');
+$('#adimg').onclick = () => editing() && pickImg('ad');
+$('#adclear').onclick = () => removeFile('ad');
+
+// ---- top friends ----
+function renderTop() {
+  const t8 = $('#top8');
+  t8.innerHTML = '';
+  if (editing()) {
+    for (let i = 0; i < P.topn; i++) {
+      const d = document.createElement('div');
+      d.innerHTML = `<select><option value=""></option>${ME.friends.map(u => `<option value="${esc(u)}">${esc(userName(u))}</option>`).join('')}</select><img alt="">`;
+      const sel = d.firstChild;
+      sel.value = ME.friends.includes(P.top[i]) ? P.top[i] : '';
+      setImg(d.lastChild, sel.value && userPic(sel.value));
+      sel.onchange = () => { P.top[i] = sel.value; save(); renderTop(); };
+      t8.appendChild(d);
+    }
+    return;
+  }
+  // visitors see the picked top friends, then fill any empty spots with other friends
+  const picked = P.top.slice(0, P.topn).filter(u => u && V.friends.includes(u));
+  const rest = V.friends.filter(u => !picked.includes(u));
+  [...new Set(picked)].concat(rest).slice(0, P.topn).forEach(u => t8.appendChild(friendCard(u)));
+}
+$('#fnum').oninput = e => { P.topn = Math.max(0, Math.min(40, +e.target.value || 0)); save(); renderTop(); };
+
+// ---- comments ----
+function renderComments() {
+  const t = $('#ctable');
+  t.innerHTML = '';
+  V.comments.forEach(c => {
+    t.appendChild(postRow(c, own() || c.from === ME.u, async () => {
+      await q(sb.from('comments').delete().eq('id', c.id));
+      V.comments = await loadComments(V.u); renderComments();
+    }));
+  });
+  $('#ccount').textContent = $('#ccount2').textContent = V.comments.length;
+}
+$('#cpost').onclick = async () => {
+  const txt = $('#ctext').value.trim(); if (!txt) return;
+  $('#cpost').disabled = true;
+  try {
+    await rpc('post_comment', { target: V.u, body: txt });
+    V.comments = await loadComments(V.u);
+    $('#ctext').value = ''; renderComments();
+  }
+  catch (e) { toast(e.message); }
+  $('#cpost').disabled = false;
+};
+
+// ---- theme ----
+const COLORS = [
+  ['page', 'Page background'], ['main', 'Profile background'], ['text', 'Text'], ['link', 'Links'], ['name', 'Name'],
+  ['top', 'Top bar'], ['logo', 'Logo'], ['nav', 'Nav bar'], ['navtext', 'Nav text'],
+  ['box', 'Box headers'], ['boxtext', 'Box header text'], ['lbl', 'Table labels'], ['lbltext', 'Table label text'],
+  ['val', 'Table cells'], ['valtext', 'Table cell text'], ['sect', 'Section headers'], ['secttext', 'Section header text'],
+  ['ext', 'Network box'], ['cmt', 'Comments'], ['cmttext', 'Comment text'], ['cmtwho', 'Commenter box']
+];
+const root = document.documentElement;
+const DEFAULTS = {};
+COLORS.forEach(([k]) => DEFAULTS[k] = getComputedStyle(root).getPropertyValue('--' + k).trim());
+$('#colors').innerHTML = COLORS.map(([k, l]) => `<span>${l}</span><input type="color" data-c="${k}">`).join('');
+$$('[data-c]').forEach(inp => inp.oninput = () => { P.theme[inp.dataset.c] = inp.value; save(); applyTheme(); });
+function resetTheme() {
+  ['font', 'size', 'radius', ...COLORS.map(c => c[0])].forEach(k => root.style.removeProperty('--' + k));
+  document.body.style.backgroundImage = '';
+  $('#custom').textContent = '';
+  document.title = 'MySpace';
+}
+function applyTheme() {
+  COLORS.forEach(([k]) => {
+    const v = /^#[0-9a-f]{6}$/i.test(P.theme[k]) ? P.theme[k] : DEFAULTS[k];
+    root.style.setProperty('--' + k, v);
+    $(`[data-c="${k}"]`).value = v;
+  });
+  const fontOk = [...$('#font').options].some(o => o.value === P.font);
+  root.style.setProperty('--font', fontOk ? P.font : 'Verdana, Arial, sans-serif');
+  $('#font').value = fontOk ? P.font : 'Verdana, Arial, sans-serif';
+  root.style.setProperty('--size', (+P.size || 11) + 'px'); $('#size').value = +P.size || 11;
+  root.style.setProperty('--radius', (+P.radius || 0) + 'px'); $('#radius').value = +P.radius || 0;
+  const b = document.body.style, bg = fileURL(P.files.bg);
+  b.backgroundImage = bg ? `url("${bg}")` : '';
+  b.backgroundRepeat = P.bgmode === 'tile' ? 'repeat' : 'no-repeat';
+  b.backgroundSize = P.bgmode === 'cover' ? 'cover' : 'auto';
+  b.backgroundPosition = P.bgmode === 'tile' ? '0 0' : 'center';
+  $('#bgmode').value = P.bgmode;
+  $('#custom').textContent = String(P.css || '');
+}
+$('#font').onchange = e => { P.font = e.target.value; save(); applyTheme(); };
+$('#size').oninput = e => { P.size = +e.target.value || 11; save(); applyTheme(); };
+$('#radius').oninput = e => { P.radius = +e.target.value || 0; save(); applyTheme(); };
+$('#bgmode').onchange = e => { P.bgmode = e.target.value; save(); applyTheme(); };
+$('#css').oninput = e => { P.css = e.target.value; save(); applyTheme(); };
+
+// ---- show/hide ----
+const SECS = [
+  ['ad', 'Banner'], ['online', 'Online Now'], ['login', 'Last Login'], ['viewmy', 'View My'],
+  ['contact', 'Contact box'], ['url', 'URL'], ['player', 'Music player'], ['interests', 'Interests'], ['details', 'Details'],
+  ['ext', 'Network box'], ['blog', 'Blog'], ['blurbs', 'Blurbs'], ['friends', 'Top Friends'], ['comments', 'Comments']
+];
+$('#secs').innerHTML = SECS.map(([k, l]) => `<label><input type="checkbox" data-s="${k}"> ${l}</label>`).join('');
+$$('[data-s]').forEach(c => c.onchange = () => { P.hide[c.dataset.s] = !c.checked; save(); applySecs(); });
+function applySecs() {
+  SECS.forEach(([k]) => {
+    $(`[data-sec="${k}"]`).classList.toggle('hidden', !!P.hide[k]);
+    $(`[data-s="${k}"]`).checked = !P.hide[k];
+  });
+  // nothing to play and not editing: hide the empty player
+  if (!songsList().length && !editing()) $('[data-sec="player"]').classList.add('hidden');
+}
+
+// ---- edit mode ----
+function setEditing(on, quiet) {
+  document.body.classList.toggle('editing', !!on);
+  $$('#v-profile [data-k]').forEach(el => el.contentEditable = !!on);
+  if (!quiet) renderAll();
+}
+$('#done').onclick = () => { location.hash = '#/u/' + encodeURIComponent(ME.u); };
+
+// ---- music (playlist) ----
+const aud = $('#aud'), play = $('#play');
+let TRACK = 0;
+const songsList = () => (P ? P.songs.filter(s => s.path) : []);
+function stopSong() { aud.pause(); aud.removeAttribute('src'); play.innerHTML = '&#9654;'; $('#prog').style.width = 0; }
+function playSong() { aud.play().then(() => { play.innerHTML = '&#10074;&#10074;'; }).catch(() => {}); }
+function loadTrack(i, andPlay) {
+  const list = songsList();
+  if (!list.length) return;
+  TRACK = ((i % list.length) + list.length) % list.length;
+  aud.src = fileURL(list[TRACK].path);
+  if (andPlay) playSong(); else play.innerHTML = '&#9654;';
+  renderSong();
+}
+function startSong() { TRACK = 0; loadTrack(0, !!P.autoplay); }
+play.onclick = () => {
+  if (!aud.src) return loadTrack(TRACK, true);
+  if (aud.paused) playSong(); else { aud.pause(); play.innerHTML = '&#9654;'; }
+};
+$('#prev').onclick = () => loadTrack(aud.currentTime > 3 ? TRACK : TRACK - 1, true);
+$('#next').onclick = () => loadTrack(TRACK + 1, true);
+aud.ontimeupdate = () => { $('#prog').style.width = (aud.currentTime / aud.duration * 100 || 0) + '%'; };
+// keeps going through the playlist, then loops back to the first song
+aud.onended = () => loadTrack(TRACK + 1, true);
+function renderSong() {
+  const list = songsList();
+  const cur = list[Math.min(TRACK, list.length - 1)];
+  $('#song').textContent = cur ? cur.title : '';
+  $('#autoplay').checked = !!P.autoplay;
+  const pl = $('#plist');
+  pl.innerHTML = '';
+  pl.classList.toggle('hidden', list.length < 2 || editing());
+  list.forEach((s, i) => {
+    const d = document.createElement('div');
+    d.className = 'pl' + (cur === s ? ' on' : '');
+    d.textContent = (i + 1) + '. ' + (s.title || 'Untitled');
+    d.onclick = () => loadTrack(i, true);
+    pl.appendChild(d);
+  });
+  // playlist editor in the panel
+  const ed = $('#pl-edit');
+  ed.innerHTML = '';
+  list.forEach((s, i) => {
+    const row = document.createElement('div');
+    row.className = 'plrow';
+    const t = document.createElement('input');
+    t.value = s.title || ''; t.placeholder = 'Title';
+    t.oninput = () => { s.title = t.value; save(); if (cur === s) $('#song').textContent = s.title; };
+    const move = d => () => {
+      const a = P.songs.indexOf(s), b = P.songs.indexOf(list[i + d]);
+      if (b < 0) return;
+      [P.songs[a], P.songs[b]] = [P.songs[b], P.songs[a]];
+      if (cur === s) TRACK = i + d; else if (cur === list[i + d]) TRACK = i;
+      save(); renderSong();
+    };
+    const up = btn('▲', move(-1)), down = btn('▼', move(1));
+    up.disabled = i === 0; down.disabled = i === list.length - 1;
+    const x = btn('Remove', async () => {
+      if (cur === s) stopSong();
+      dropFile(s.path);
+      P.songs = P.songs.filter(z => z !== s);
+      TRACK = 0; save(); renderSong(); applySecs();
+    });
+    row.append((i + 1) + '.', t, up, down, x);
+    ed.appendChild(row);
+  });
+}
+$('#autoplay').onchange = e => { P.autoplay = e.target.checked; save(); };
+$('#songpick').onclick = () => $('#songfile').click();
+
+// big songs get re-encoded to a smaller mp3 so they fit
+function loadLame() {
+  if (window.lamejs) return Promise.resolve(true);
+  return new Promise(res => {
+    const s = document.createElement('script');
+    s.src = 'https://cdnjs.cloudflare.com/ajax/libs/lamejs/1.2.1/lame.min.js';
+    s.onload = () => res(!!window.lamejs); s.onerror = () => res(false);
+    document.head.appendChild(s);
+  });
+}
+async function shrinkSong(f) {
+  if (f.size <= 12e6) return f;
+  if (!(await loadLame())) throw new Error('Song is too big (max 12MB)');
+  $('#saved').textContent = 'Shrinking song...';
+  const ctx = new (window.AudioContext || window.webkitAudioContext)();
+  const buf = await ctx.decodeAudioData(await f.arrayBuffer());
+  ctx.close();
+  for (const kbps of [112, 80, 56]) {
+    const ch = Math.min(2, buf.numberOfChannels);
+    const enc = new lamejs.Mp3Encoder(ch, buf.sampleRate, kbps);
+    const toInt = d => { const o = new Int16Array(d.length); for (let i = 0; i < d.length; i++) { const v = Math.max(-1, Math.min(1, d[i])); o[i] = v < 0 ? v * 32768 : v * 32767; } return o; };
+    const L = toInt(buf.getChannelData(0)), R = ch > 1 ? toInt(buf.getChannelData(1)) : null;
+    const parts = [];
+    for (let i = 0; i < L.length; i += 1152) {
+      const m = R ? enc.encodeBuffer(L.subarray(i, i + 1152), R.subarray(i, i + 1152)) : enc.encodeBuffer(L.subarray(i, i + 1152));
+      if (m.length) parts.push(new Uint8Array(m));
+      if (i % (1152 * 400) === 0) await new Promise(r => setTimeout(r));
+    }
+    const end = enc.flush(); if (end.length) parts.push(new Uint8Array(end));
+    const blob = new Blob(parts, { type: 'audio/mpeg' });
+    if (blob.size <= 12e6) return blob;
+  }
+  throw new Error('Song is too long');
+}
+$('#songfile').onchange = async e => {
+  const files = [...e.target.files]; e.target.value = '';
+  for (const f of files) {
+    try {
+      $('#saved').textContent = 'Uploading ' + f.name;
+      let blob = await shrinkSong(f);
+      if (!/^audio\//.test(blob.type)) blob = new Blob([blob], { type: 'audio/mpeg' });
+      const path = await putFile('snd', blob);
+      P.songs.push({ path, title: f.name.replace(/\.[^.]+$/, '') });
+      save(0); renderSong(); applySecs();
+      $('#saved').textContent = 'Saved';
+    } catch (err) { $('#saved').textContent = err.message; toast(err.message); }
+  }
+};
+
+// ---- sparkles ----
+$('#spark').onchange = e => { P.spark = e.target.checked; save(); };
+$('#sparkc').oninput = e => { P.sparkc = e.target.value; save(); };
+document.addEventListener('mousemove', e => {
+  if (!P || !P.spark || $('#v-profile').classList.contains('hidden') || Math.random() > 0.4) return;
+  const s = document.createElement('div');
+  s.textContent = '✦';
+  s.style.cssText = `position:fixed;left:${e.clientX}px;top:${e.clientY}px;color:${/^#[0-9a-f]{6}$/i.test(P.sparkc) ? P.sparkc : '#ff66cc'};pointer-events:none;font-size:${8 + Math.random() * 10}px;transition:all .8s;z-index:99`;
+  document.body.appendChild(s);
+  requestAnimationFrame(() => { s.style.transform = `translate(${Math.random() * 30 - 15}px,${20 + Math.random() * 20}px)`; s.style.opacity = 0; });
+  setTimeout(() => s.remove(), 800);
+});
+
+// ---- reset / delete ----
+$('#reset').onclick = async () => {
+  if (!confirm('Clear your whole profile? Pictures and song too.')) return;
+  try { await dropAllFiles(); await setPic(null); } catch (e) {}
+  V.P = P = normalize({});
+  stopSong();
+  save(0); renderAll();
+};
+$('#delacct').onclick = async () => {
+  if (!confirm('Delete your account forever?')) return;
+  if (prompt('Type your username to confirm') !== ME.u) return;
+  try {
+    await dropAllFiles().catch(() => {});
+    await rpc('delete_account');
+    await sb.auth.signOut().catch(() => {});
+    ME = null; location.hash = '#/'; route();
+  }
+  catch (e) { toast(e.message); }
+};
+
+function renderAll() {
+  if (!V || $('#v-profile').classList.contains('hidden')) return;
+  fillTexts();
+  setImg($('#mepic'), fileURL(P.files.me));
+  const adSrc = fileURL(P.files.ad);
+  $('#adimg').classList.toggle('hidden', !adSrc);
+  $('[data-sec="ad"]').classList.toggle('hasimg', !!adSrc);
+  if (adSrc) $('#adimg').src = adSrc;
+  renderRows(); renderTop(); renderComments(); renderSong(); applyTheme(); applySecs();
+  $('#fnum').value = P.topn;
+  $('#spark').checked = !!P.spark; $('#sparkc').value = /^#[0-9a-f]{6}$/i.test(P.sparkc) ? P.sparkc : '#ff66cc';
+  $('#css').value = P.css || '';
+  renderStatus();
+  const n = strip(P.text.name) || V.u;
+  $('#p-allfriends').textContent = `View All of ${n}'s Friends`;
+  $('#p-allfriends').href = '#/u/' + enc(V.u) + '/friends';
+  // "Online Now" only shows when they've been on in the last 5 minutes
+  const online = own() || Date.now() - (V.last || 0) < 5 * 60e3;
+  if (!online && !editing()) $('[data-sec="online"]').classList.add('hidden');
+}
+
+// ======================= PICS / VIDEOS / ALL FRIENDS =======================
+let MEDIA_KIND = 'pics';
+async function openMedia(u, kind) {
+  try { await loadProfile(u); }
+  catch (e) { renderHome(); toast(e.message); return; }
+  MEDIA_KIND = ['pics', 'videos', 'friends'].includes(kind) ? kind : 'pics';
+  show('v-media');
+  applyTheme();
+  renderMedia();
+}
+function renderMedia() {
+  const kind = MEDIA_KIND, n = strip(P.text.name) || V.u;
+  document.title = 'MySpace.com - ' + n;
+  $('#md-back').textContent = `Back to ${n}'s Profile`;
+  $('#md-back').href = '#/u/' + enc(V.u);
+  $('#md-tools').classList.toggle('hidden', !(own() && kind !== 'friends'));
+  const grid = $('#md-grid');
+  grid.innerHTML = '';
+  if (kind === 'friends') {
+    $('#md-title').textContent = `${n}'s Friends (${V.friends.length})`;
+    grid.className = 'grid8';
+    grid.style.gridTemplateColumns = 'repeat(auto-fill,minmax(110px,1fr))';
+    V.friends.forEach(u => grid.appendChild(friendCard(u)));
+    return;
+  }
+  grid.className = 'media';
+  grid.style.gridTemplateColumns = '';
+  const isPic = kind === 'pics';
+  const list = (isPic ? P.album : P.videos).filter(m => m.path);
+  $('#md-title').textContent = `${n}'s ${isPic ? 'Pics' : 'Videos'} (${list.length})`;
+  list.forEach(m => {
+    const src = fileURL(m.path);
+    const it = document.createElement('div');
+    it.className = 'it';
+    const el = document.createElement(isPic ? 'img' : 'video');
+    el.src = src;
+    if (!isPic) { el.preload = 'metadata'; el.muted = true; }
+    el.onclick = () => modal(strip(m.cap) || (isPic ? 'Pic' : 'Video'), b => {
+      const big = document.createElement(isPic ? 'img' : 'video');
+      big.src = src;
+      if (!isPic) { big.controls = true; big.autoplay = true; }
+      b.appendChild(big);
+      if (m.cap) { const c = document.createElement('div'); c.textContent = m.cap; b.appendChild(c); }
+      b.appendChild(btn('Close', closeModal));
+    }, true);
+    it.appendChild(el);
+    if (own()) {
+      const cap = document.createElement('input');
+      cap.placeholder = 'Caption'; cap.value = m.cap || '';
+      cap.oninput = () => { m.cap = cap.value; save(); };
+      const row = document.createElement('div');
+      row.className = 'btns'; row.style.cssText = 'display:flex;gap:4px;justify-content:center;margin-top:3px;flex-wrap:wrap';
+      if (isPic) row.appendChild(btn('Make Profile Pic', async () => {
+        const blob = await (await fetch(src)).blob();
+        await upload('me', blob); toast('Profile pic changed');
+      }));
+      row.appendChild(btn('Delete', async () => {
+        if (!confirm('Delete this?')) return;
+        dropFile(m.path);
+        if (isPic) P.album = P.album.filter(x => x !== m); else P.videos = P.videos.filter(x => x !== m);
+        save(); renderMedia();
+      }));
+      it.append(cap, row);
+    } else if (m.cap) {
+      const c = document.createElement('div'); c.className = 'cap'; c.textContent = m.cap; it.appendChild(c);
+    }
+    grid.appendChild(it);
+  });
+}
+const mediaFile = document.createElement('input');
+mediaFile.type = 'file'; mediaFile.multiple = true;
+$('#md-upload').onclick = () => {
+  mediaFile.accept = MEDIA_KIND === 'pics' ? 'image/png,image/jpeg,image/gif,image/webp' : 'video/mp4,video/webm,video/quicktime';
+  mediaFile.click();
+};
+mediaFile.onchange = async () => {
+  const files = [...mediaFile.files]; mediaFile.value = '';
+  const isPic = MEDIA_KIND === 'pics';
+  for (const f of files) {
+    try {
+      if (!isPic && f.size > 25e6) throw new Error(f.name + ' is too big (max 25MB)');
+      if (!isPic && !EXT[f.type]) throw new Error(f.name + ': use mp4, webm or mov');
+      toast('Uploading ' + f.name);
+      const blob = isPic ? await shrink(f, 1400) : f;
+      const path = await putFile(isPic ? 'pic' : 'vid', blob);
+      (isPic ? P.album : P.videos).push({ path, cap: '' });
+      save(0); renderMedia();
+    } catch (e) { toast(e.message); }
+  }
+};
+
+// ======================= MAIL / IM =======================
+let MAIL = [], MAILWITH = null, mailShown = '';
+async function openMail(withU) {
+  show('v-mail');
+  MAILWITH = withU && withU !== ME.u ? withU : null;
+  mailShown = '';
+  const sel = $('#m-to');
+  sel.innerHTML = '<option value="">To</option>' + Object.keys(USERS).filter(u => u !== ME.u)
+    .sort((a, b) => userName(a).localeCompare(userName(b))).map(u => `<option value="${esc(u)}">${esc(userName(u))}</option>`).join('');
+  sel.onchange = () => { if (sel.value) location.hash = '#/mail/' + enc(sel.value); };
+  renderMail();
+  await loadMail();
+  pollT = setInterval(loadMail, 5000);
+  if (MAILWITH) $('#m-text').focus();
+}
+async function loadMail() {
+  try {
+    const rows = await q(sb.from('mail').select('id,from_u,to_u,body,at,read').order('at'));
+    MAIL = rows.map(m => ({ id: m.id, from: m.from_u, to: m.to_u, text: m.body, at: Date.parse(m.at), read: m.read }));
+  } catch (e) { return; }
+  if (MAILWITH && MAIL.some(m => m.from === MAILWITH && m.to === ME.u && !m.read)) {
+    try { ME.unread = await rpc('mark_read', { other: MAILWITH }); updateUnread(); } catch (e) {}
+    MAIL.forEach(m => { if (m.from === MAILWITH) m.read = true; });
+  }
+  renderMail();
+}
+function renderMail() {
+  const other = m => m.from === ME.u ? m.to : m.from;
+  const convos = {};
+  MAIL.forEach(m => {
+    const o = other(m);
+    const c = convos[o] ||= { u: o, last: m, unread: 0 };
+    if (m.at >= c.last.at) c.last = m;
+    if (m.to === ME.u && !m.read) c.unread++;
+  });
+  if (MAILWITH && !convos[MAILWITH]) convos[MAILWITH] = { u: MAILWITH, last: { text: '', at: Date.now() }, unread: 0 };
+  const list = $('#m-list');
+  list.innerHTML = '';
+  Object.values(convos).sort((a, b) => b.last.at - a.last.at).forEach(c => {
+    const row = document.createElement('div');
+    row.className = 'conv' + (c.u === MAILWITH ? ' on' : '') + (c.unread ? ' unread' : '');
+    row.innerHTML = `<img alt=""><div style="min-width:0"><div class="cn"></div><div class="pv"></div></div>`;
+    setImg(row.querySelector('img'), userPic(c.u));
+    row.querySelector('.cn').textContent = userName(c.u) + (c.unread ? ` (${c.unread})` : '');
+    row.querySelector('.pv').textContent = strip(c.last.text);
+    row.onclick = () => { location.hash = '#/mail/' + enc(c.u); };
+    list.appendChild(row);
+  });
+
+  $('#m-compose').classList.toggle('hidden', !MAILWITH);
+  const title = $('#m-title');
+  if (!MAILWITH) { title.textContent = 'Mail'; $('#m-thread').innerHTML = ''; return; }
+  title.innerHTML = `<a href="#/u/${enc(MAILWITH)}" style="color:inherit">${esc(userName(MAILWITH))}</a>`;
+  const msgs = MAIL.filter(m => other(m) === MAILWITH).sort((a, b) => a.at - b.at);
+  const sig = MAILWITH + ':' + msgs.map(m => m.id).join(',');
+  if (sig === mailShown) return; // nothing new, don't jump the scroll
+  mailShown = sig;
+  const th = $('#m-thread');
+  th.innerHTML = '';
+  msgs.forEach(m => {
+    const d = document.createElement('div');
+    d.className = 'bub' + (m.from === ME.u ? ' mine' : '');
+    d.innerHTML = clean(m.text.replace(/\n/g, '<br>')) + `<div class="when">${esc(fmtDate(m.at))}</div>`;
+    th.appendChild(d);
+  });
+  th.scrollTop = th.scrollHeight;
+}
+async function sendMail() {
+  const text = $('#m-text').value.trim();
+  if (!text || !MAILWITH) return;
+  $('#m-send').disabled = true;
+  try { await rpc('send_mail', { target: MAILWITH, body: text }); $('#m-text').value = ''; await loadMail(); }
+  catch (e) { toast(e.message); }
+  $('#m-send').disabled = false;
+  $('#m-text').focus();
+}
+$('#m-send').onclick = sendMail;
+$('#m-text').onkeydown = e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMail(); } };
+
+// ======================= GROUPS =======================
+async function loadGroups() {
+  const rows = await q(sb.from('groups').select('id,name,owner,group_members(u)'));
+  const all = {};
+  rows.forEach(g => all[g.id] = { name: g.name, owner: g.owner, members: g.group_members.map(m => m.u) });
+  return all;
+}
+async function fetchGroup(id) {
+  const g = await q(sb.from('groups').select('id,name,owner,group_members(u),group_posts(id,from_u,body,at)').eq('id', id).maybeSingle());
+  if (!g) throw new Error('No such group');
+  return {
+    id: g.id, name: g.name, owner: g.owner, members: g.group_members.map(m => m.u),
+    posts: g.group_posts.map(p => ({ id: p.id, from: p.from_u, text: p.body, at: Date.parse(p.at) })).sort((a, b) => b.at - a.at)
+  };
+}
+async function gAct(act, arg) {
+  await rpc('group_action', { gid: G.id, act, arg: arg ?? null });
+  G = await fetchGroup(G.id);
+}
+async function renderGroups() {
+  show('v-groups');
+  const all = await loadGroups().catch(() => ({}));
+  const entries = Object.entries(all).sort((a, b) => a[1].name.localeCompare(b[1].name));
+  const html = list => '<div class="glist">' + list.map(([id, g]) => `<div><a href="#/g/${enc(id)}" style="display:inline">${esc(g.name)}</a> (${g.members.length})</div>`).join('') + '</div>';
+  $('#g-mine').innerHTML = html(entries.filter(([, g]) => g.members.includes(ME.u)));
+  $('#g-all').innerHTML = html(entries);
+}
+$('#g-create').onclick = async () => {
+  const name = $('#g-newname').value.trim();
+  if (!name) return;
+  try { const id = await rpc('create_group', { name }); $('#g-newname').value = ''; location.hash = '#/g/' + id; }
+  catch (e) { toast(e.message); }
+};
+let G = null;
+async function openGroup(id) {
+  try { G = await fetchGroup(id); }
+  catch (e) { toast(e.message); location.hash = '#/groups'; return; }
+  show('v-group');
+  renderGroup();
+}
+function renderGroup() {
+  const mem = G.members.includes(ME.u), owner = G.owner === ME.u;
+  $('#gp-name').textContent = G.name;
+  document.title = 'MySpace.com - ' + G.name;
+  $('#gp-join').classList.toggle('hidden', mem);
+  $('#gp-leave').classList.toggle('hidden', !mem || owner);
+  $('#gp-rename').classList.toggle('hidden', !owner);
+  $('#gp-delete').classList.toggle('hidden', !owner);
+  $('#gp-count').textContent = G.members.length;
+  const mg = $('#gp-members');
+  mg.innerHTML = '';
+  G.members.forEach(u => mg.appendChild(friendCard(u)));
+  $('#gp-compose').classList.toggle('hidden', !mem);
+  const t = $('#gp-posts');
+  t.innerHTML = '';
+  G.posts.forEach(p => t.appendChild(postRow(p, p.from === ME.u || owner, async () => {
+    await gAct('delete_post', p.id); renderGroup();
+  })));
+}
+const groupDo = fn => async () => { try { await fn(); renderGroup(); } catch (e) { toast(e.message); } };
+$('#gp-join').onclick = groupDo(() => gAct('join'));
+$('#gp-leave').onclick = groupDo(() => gAct('leave'));
+$('#gp-rename').onclick = groupDo(async () => {
+  const name = prompt('Group name', G.name);
+  if (name && name.trim()) await gAct('rename', name);
+});
+$('#gp-delete').onclick = async () => {
+  if (!confirm('Delete this group?')) return;
+  try { await rpc('group_action', { gid: G.id, act: 'delete', arg: null }); location.hash = '#/groups'; } catch (e) { toast(e.message); }
+};
+$('#gp-post').onclick = groupDo(async () => {
+  const text = $('#gp-text').value.trim();
+  if (!text) return;
+  await gAct('post', text);
+  $('#gp-text').value = '';
+});
+
+(async () => { await refreshMe(); route(); })();
+</script>
+</body>
+</html>
