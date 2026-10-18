@@ -394,6 +394,10 @@
 <div class="panel">
   <div class="done"><button id="done"><b>Done</b></button><span id="saved"></span></div>
 
+  <h4>My Themes</h4>
+  <div class="plrow"><input id="th-name" placeholder="Name"><button id="th-save">Save current</button></div>
+  <div id="th-list"></div>
+
   <h4>Colors</h4>
   <div class="grid" id="colors"></div>
 
@@ -906,7 +910,7 @@ async function upload(key, blob) {
     P.files[key] = path;
     if (key === 'me') await setPic(path);
     save(0);
-    dropFile(old);
+    if (!themeUses(old)) dropFile(old);
     renderAll();
   } catch (e) { $('#saved').textContent = e.message; toast(e.message); }
 }
@@ -916,7 +920,7 @@ async function removeFile(key) {
     delete P.files[key];
     if (key === 'me') await setPic(null);
     save(0);
-    dropFile(old);
+    if (!themeUses(old)) dropFile(old);
     renderAll();
   } catch (e) { toast(e.message); }
 }
@@ -1024,6 +1028,57 @@ $('#size').oninput = e => { P.size = +e.target.value || 11; save(); applyTheme()
 $('#radius').oninput = e => { P.radius = +e.target.value || 0; save(); applyTheme(); };
 $('#bgmode').onchange = e => { P.bgmode = e.target.value; save(); applyTheme(); };
 $('#css').oninput = e => { P.css = e.target.value; save(); applyTheme(); };
+
+// ---- saved themes (each account keeps its own list) ----
+const LOOK_KEYS = ['theme', 'font', 'size', 'radius', 'bgmode', 'css', 'spark', 'sparkc'];
+const themeUses = path => !!path && (P.presets || []).some(t => t.look.bg === path);
+function currentLook() {
+  const look = JSON.parse(JSON.stringify(Object.fromEntries(LOOK_KEYS.map(k => [k, P[k]]))));
+  look.bg = P.files.bg || null;
+  return look;
+}
+function renderThemes() {
+  P.presets ??= [];
+  const list = $('#th-list');
+  list.innerHTML = '';
+  P.presets.forEach((t, i) => {
+    const row = document.createElement('div');
+    row.className = 'plrow';
+    const name = document.createElement('span');
+    name.textContent = t.name; name.style.flex = '1'; name.style.wordBreak = 'break-word';
+    row.append(name,
+      btn('Use', () => {
+        const old = P.files.bg;
+        LOOK_KEYS.forEach(k => { P[k] = t.look[k] === undefined ? undefined : JSON.parse(JSON.stringify(t.look[k])); });
+        P.theme ??= {};
+        if (t.look.bg) P.files.bg = t.look.bg; else delete P.files.bg;
+        if (old && old !== P.files.bg && !themeUses(old)) dropFile(old);
+        save(0); renderAll(); toast('Switched to ' + t.name);
+      }),
+      btn('Update', () => {
+        if (!confirm(`Replace "${t.name}" with how your profile looks right now?`)) return;
+        t.look = currentLook(); save(0); toast('Updated ' + t.name);
+      }),
+      btn('Delete', () => {
+        if (!confirm(`Delete "${t.name}"?`)) return;
+        const bg = t.look.bg;
+        P.presets.splice(i, 1);
+        if (bg && bg !== P.files.bg && !themeUses(bg)) dropFile(bg);
+        save(0); renderThemes();
+      }));
+    list.appendChild(row);
+  });
+}
+$('#th-save').onclick = () => {
+  const name = $('#th-name').value.trim();
+  if (!name) return $('#th-name').focus();
+  P.presets ??= [];
+  const same = P.presets.find(t => t.name.toLowerCase() === name.toLowerCase());
+  if (same && !confirm(`You already have "${same.name}". Replace it?`)) return;
+  if (same) same.look = currentLook(); else P.presets.push({ name, look: currentLook() });
+  $('#th-name').value = '';
+  save(0); renderThemes(); toast('Saved ' + name);
+};
 
 // ---- show/hide ----
 const SECS = [
@@ -1214,6 +1269,7 @@ function renderAll() {
   $('#fnum').value = P.topn;
   $('#spark').checked = !!P.spark; $('#sparkc').value = /^#[0-9a-f]{6}$/i.test(P.sparkc) ? P.sparkc : '#ff66cc';
   $('#css').value = P.css || '';
+  renderThemes();
   renderStatus();
   const n = strip(P.text.name) || V.u;
   $('#p-allfriends').textContent = `View All of ${n}'s Friends`;
